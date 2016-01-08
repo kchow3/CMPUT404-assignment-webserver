@@ -26,13 +26,22 @@ import SocketServer
 
 # try: curl -v -X GET http://127.0.0.1:8080/
 
+from os import curdir
 
 class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        print ("Got a request of: %s\n" % self.data)
+        #print ("Got a request of: %s\n" % self.data)
+        self.parseRequest()
+        #print(self.path)
+        open(curdir + '/www' + self.path, 'r')
         self.request.sendall("OK")
+
+    def parseRequest(self):
+        lines = str.splitlines(self.data)
+        line1 = lines[0].split()
+        self.path = line1[1]
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
