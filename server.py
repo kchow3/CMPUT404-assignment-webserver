@@ -35,8 +35,8 @@ class MyWebServer(SocketServer.BaseRequestHandler):
         #print ("Got a request of: %s\n" % self.data)
         self.parseRequest()
         #print(self.path)
-        open(curdir + '/www' + self.path, 'r')
-        self.request.sendall("OK")
+        response = open(curdir + '/www' + self.path, 'r')
+        self.request.sendall(response.read())
 
     def parseRequest(self):
         lines = str.splitlines(self.data)
