@@ -32,11 +32,24 @@ class MyWebServer(SocketServer.BaseRequestHandler):
     
     def handle(self):
         self.data = self.request.recv(1024).strip()
-        #print ("Got a request of: %s\n" % self.data)
+        self.length = len(self.data)
+        print ("Got a request of: %s\n" % self.data)
         self.parseRequest()
-        #print(self.path)
-        response = open(curdir + '/www' + self.path, 'r')
-        self.request.sendall(response.read())
+        if(self.path.endswith('/')):
+            response = open(curdir + '/www' + self.path + 'index.html', 'r')
+            self.request.sendall('HTTP/1.1 200 OK\r\n Content-Type: text/html\r\n Content-Length: ' + str(72 + self.length + len(response.read())) + '\r\n\r\n' + response.read())
+        else:
+            try:
+                if(self.path.endswith('.html')):
+                    response = open(curdir + '/www' + self.path, 'r')
+                    self.request.sendall('HTTP/1.1 200 OK\r\n Content-Type: text/html\r\n Content-Length: ' + str(72 + self.length + len(response.read())) + '\r\n\r\n' + response.read())
+                elif(self.path.endswith('.css')):
+                    response = open(curdir + '/www' + self.path, 'r')
+                    self.request.send('HTTP/1.1 200 OK\r\n Content-Type: text/css\r\n Content-Length: ' + str(72 + self.length + len(response.read())) + '\r\n\r\n' + response.read())
+                else:
+                    self.request.sendall('HTTP/1.1 404 Not Found\r\n')
+            except:
+                self.request.sendall('HTTP/1.1 404 Not Found\r\n')
 
     def parseRequest(self):
         lines = str.splitlines(self.data)
