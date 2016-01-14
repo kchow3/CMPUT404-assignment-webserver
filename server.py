@@ -30,17 +30,17 @@ from os import curdir
 
 class MyWebServer(SocketServer.BaseRequestHandler):
 
-    HTTP_OK = "HTTP/1.1 200 OK \r\n"
-    HTTP_NOT_FOUND = "HTTP/1.1 404 Not Found \r\n"
-    HEADER_CONTENT_TYPE = "Content-Type: "
-    HEADER_CONTENT_LENGTH = "Content-Length: "
-    HEADER_CLOSE = "Connection: close \r\n"
-    CRLF = "\r\n"
+    HTTP_OK = 'HTTP/1.1 200 OK \r\n'
+    HTTP_NOT_FOUND = 'HTTP/1.1 404 Not Found \r\n'
+    HEADER_CONTENT_TYPE = 'Content-Type: '
+    HEADER_CONTENT_LENGTH = 'Content-Length: '
+    HEADER_CLOSE = 'Connection: close \r\n'
+    CRLF = '\r\n'
 
-    def handle(self):
-        self.data = self.request.recv(1024).strip()
-        self.httpGET()
-        self.sendall(self.response)
+    def parseRequest(self):
+        lines = str.splitlines(self.data)
+        line1 = lines[0].split()
+        self.path = line1[1]
 
     def httpGET(self):
         self.parseRequest()
@@ -55,19 +55,16 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 self.file = open(curdir + '/www' + self.path, 'r').read()
                 self.type = 'text/css'
             else:
-                self.request.sendall('HTTP/1.1 404 Not Found\r\n')
+                self.request.sendall(self.HTTP_NOT_FOUND)
+
             self.length = len(self.file)
-            self.buildResponse()
+            self.request.sendall(self.HTTP_OK + self.HEADER_CONTENT_LENGTH + str(self.length) + self.CRLF + self.HEADER_CONTENT_TYPE + self.type + self.CRLF + self.HEADER_CLOSE + self.CRLF + self.file)
         except:
-            self.request.sendall('HTTP/1.1 404 Not Found\r\n')
+            self.request.sendall(self.HTTP_NOT_FOUND)
 
-    def parseRequest(self):
-        lines = str.splitlines(self.data)
-        line1 = lines[0].split()
-        self.path = line1[1]
-
-    def buildResponse(self):
-        self.response += HTTP_OK + HEADER_CONTENT_LENGTH + self.length + CRLF + HEADER_CONTENT_TYPE + self.type + CRLF + HEADER_CLOSE + CRLF + self.file
+    def handle(self):
+        self.data = self.request.recv(1024).strip()
+        self.httpGET()
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
