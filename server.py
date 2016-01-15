@@ -32,6 +32,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
 
     HTTP_OK = 'HTTP/1.1 200 OK \r\n'
     HTTP_NOT_FOUND = 'HTTP/1.1 404 Not Found \r\n'
+    HTTP_REDIRECT = 'HTTP/1.1 301 Moved Permanently \r\n'
     HEADER_CONTENT_TYPE = 'Content-Type: '
     HEADER_CONTENT_LENGTH = 'Content-Length: '
     HEADER_CLOSE = 'Connection: close \r\n'
@@ -55,7 +56,7 @@ class MyWebServer(SocketServer.BaseRequestHandler):
                 self.file = open(curdir + '/www' + self.path, 'r').read()
                 self.type = 'text/css'
             else:
-                self.request.sendall(self.HTTP_NOT_FOUND)
+                self.request.sendall(self.HTTP_REDIRECT + 'Location: ' + self.path + '/' + self.CRLF)
 
             self.length = len(self.file)
             self.request.sendall(self.HTTP_OK + self.HEADER_CONTENT_LENGTH + str(self.length) + self.CRLF + self.HEADER_CONTENT_TYPE + self.type + self.CRLF + self.HEADER_CLOSE + self.CRLF + self.file)
